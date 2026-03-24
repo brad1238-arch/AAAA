@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Prox Date Calculator</title>
+
+<style>
+    body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #eef2f7;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding-top: 40px;
+    }
+
+    .widget-container {
+        width: 360px;
+        background: white;
+        padding: 25px;
+        border-radius: 14px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        animation: fadeIn 0.5s ease;
+    }
+
+    h2 {
+        margin-top: 0;
+        color: #005a9e;
+        text-align: center;
+    }
+
+    label {
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    input[type="date"] {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #cdd6e1;
+        border-radius: 8px;
+        margin-top: 6px;
+        font-size: 15px;
+    }
+
+    button {
+        width: 100%;
+        padding: 12px;
+        margin-top: 15px;
+        font-size: 16px;
+        background: #005a9e;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    button:hover {
+        background: #00467a;
+    }
+
+    .results {
+        margin-top: 20px;
+        display: none;
+    }
+
+    .result-card {
+        background: #f7fbff;
+        padding: 12px;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        border-left: 5px solid #0078d4;
+        animation: slideIn 0.3s ease;
+    }
+
+    .result-title {
+        font-weight: bold;
+        margin-bottom: 4px;
+    }
+
+    .aging {
+        font-size: 13px;
+        color: #444;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateX(-10px); }
+        to   { opacity: 1; transform: translateX(0); }
+    }
+</style>
+</head>
+<body>
+
+<div class="widget-container">
+    <h2>Prox Date Calculator</h2>
+
+    <label>Invoice Date</label>
+    <input type="date" id="invoiceDate">
+
+    <button onclick="calculateProx()">Calculate</button>
+
+    <div id="results" class="results"></div>
+</div>
+
+<script>
+function addMonths(date, months) {
+    let d = new Date(date);
+    d.setMonth(d.getMonth() + months);
+    return d;
+}
+
+function setTo5th(date) {
+    let d = new Date(date);
+    d.setDate(5);
+    return d;
+}
+
+function prox(date, months) {
+    return setTo5th(addMonths(date, months));
+}
+
+function formatDate(d) {
+    return d.toLocaleDateString("en-US", {
+        year: "numeric", month: "2-digit", day: "2-digit"
+    });
+}
+
+function aging(from, to) {
+    return Math.round((to - from) / (1000 * 60 * 60 * 24));
+}
+
+function addResult(parent, title, date, age) {
+    parent.innerHTML += `
+        <div class="result-card">
+            <div class="result-title">${title}: ${formatDate(date)}</div>
+            <div class="aging">${age} Days Aging</div>
+        </div>
+    `;
+}
+
+function calculateProx() {
+    const input = document.getElementById("invoiceDate").value;
+    if (!input) return;
+
+    const inv = new Date(input);
+    const results = document.getElementById("results");
+    results.innerHTML = "";
+    results.style.display = "block";
+
+    const proxDates = [
+        { label: "Prox 1 Month",     date: prox(inv, 1.0) },
+        { label: "Prox 1.5 Months",  date: prox(inv, 1.5) },
+        { label: "Prox 2 Months",    date: prox(inv, 2.0) },
+        { label: "Prox 2.5 Months",  date: prox(inv, 2.5) },
+        { label: "Prox 3 Months",    date: prox(inv, 3.0) }
+    ];
+
+    proxDates.forEach(p =>
+        addResult(results, p.label, p.date, aging(inv, p.date))
+    );
+}
+</script>
+
+</body>
+</html>
